@@ -1,4 +1,4 @@
-// Copyright 2012 Francisco Souza. All rights reserved.
+// Copyright 2012 commandmocker authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -20,6 +20,12 @@ output="{{.}}"
 echo -n "${output}"
 `
 
+// Add creates a temporary directory containing an executable file named "name"
+// that prints "output" when executed. It also adds the temporary directory to
+// the first position of $PATH.
+//
+// It returns the temporary directory path (for future removing, using the
+// Remove function) and an error if any happen.
 func Add(name, output string) (tempdir string, err error) {
 	tempdir = path.Join(os.TempDir(), "commandmocker")
 	err = os.MkdirAll(tempdir, 0777)
@@ -45,6 +51,10 @@ func Add(name, output string) (tempdir string, err error) {
 	return
 }
 
+// Remove removes the tempdir from $PATH and from file system.
+//
+// If the temporary directory is not in the first position of $PATH, it returns
+// error. This function is intended only to undo what Add does.
 func Remove(tempdir string) error {
 	path := os.Getenv("PATH")
 	if strings.HasPrefix(path, tempdir) {
