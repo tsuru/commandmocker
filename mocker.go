@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync"
 	"syscall"
 	"text/template"
 	"time"
@@ -20,6 +21,8 @@ var source = `#!/bin/sh -e
 output="{{.}}"
 echo -n "${output}"
 `
+
+var pathMutex sync.Mutex
 
 // Add creates a temporary directory containing an executable file named "name"
 // that prints "output" when executed. It also adds the temporary directory to
@@ -46,6 +49,8 @@ func Add(name, output string) (tempdir string, err error) {
 	if err != nil {
 		return
 	}
+	pathMutex.Lock()
+	defer pathMutex.Unlock()
 	path := os.Getenv("PATH")
 	path = tempdir + ":" + path
 	err = os.Setenv("PATH", path)
@@ -60,13 +65,16 @@ func Remove(tempdir string) error {
 	if !strings.HasPrefix(tempdir, os.TempDir()) {
 		return errors.New("Remove can only remove temporary directories, tryied to remove " + tempdir)
 	}
+	pathMutex.Lock()
 	path := os.Getenv("PATH")
 	index := strings.Index(path, tempdir)
 	if index < 0 {
+		pathMutex.Unlock()
 		return errors.New(fmt.Sprintf("%s is not in $PATH", tempdir))
 	}
 	path = path[:index] + path[index+len(tempdir)+1:]
 	err := os.Setenv("PATH", path)
+	pathMutex.Unlock()
 	if err != nil {
 		return err
 	}
