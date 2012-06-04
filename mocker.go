@@ -12,6 +12,7 @@ import (
 	"strings"
 	"syscall"
 	"text/template"
+	"time"
 )
 
 var source = `#!/bin/sh -e
@@ -27,7 +28,7 @@ echo -n "${output}"
 // It returns the temporary directory path (for future removing, using the
 // Remove function) and an error if any happen.
 func Add(name, output string) (tempdir string, err error) {
-	tempdir = path.Join(os.TempDir(), "commandmocker")
+	tempdir = path.Join(os.TempDir(), "commandmocker+" + time.Now().Format("20060102150405999999999"))
 	err = os.MkdirAll(tempdir, 0777)
 	if err != nil {
 		return
