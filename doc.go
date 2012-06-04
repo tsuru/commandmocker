@@ -14,7 +14,7 @@
 //     )
 //
 //     func TestScreamsIfSSHFail(t *testing.T) {
-// 		msg := "ssh: Could not resolve hostname myhost: nodename nor servname provided, or not known"
+//     msg := "ssh: Could not resolve hostname myhost: nodename nor servname provided, or not known"
 //         path, err := commandmocker.Add("ssh", msg)
 //         if err != nil {
 //             t.Error(err)
