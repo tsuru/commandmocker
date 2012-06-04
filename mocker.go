@@ -32,6 +32,11 @@ var pathMutex sync.Mutex
 // Remove function) and an error if any happen.
 func Add(name, output string) (tempdir string, err error) {
 	tempdir = path.Join(os.TempDir(), "commandmocker+" + time.Now().Format("20060102150405999999999"))
+	_, err = os.Stat(tempdir)
+	for !os.IsNotExist(err) {
+		tempdir = path.Join(os.TempDir(), "commandmocker+" + time.Now().Format("20060102150405999999999"))
+		_, err = os.Stat(tempdir)
+	}
 	err = os.MkdirAll(tempdir, 0777)
 	if err != nil {
 		return
