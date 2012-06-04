@@ -53,17 +53,21 @@ func Add(name, output string) (tempdir string, err error) {
 
 // Remove removes the tempdir from $PATH and from file system.
 //
-// If the temporary directory is not in the first position of $PATH, it returns
-// error. This function is intended only to undo what Add does.
+// This function is intended only to undo what Add does. It returns error if
+// the given tempdir is not a temporary directory.
 func Remove(tempdir string) error {
-	path := os.Getenv("PATH")
-	if strings.HasPrefix(path, tempdir) {
-		path = path[len(tempdir)+1:]
-		err := os.Setenv("PATH", path)
-		if err != nil {
-			return err
-		}
-		return os.RemoveAll(tempdir)
+	if !strings.HasPrefix(tempdir, os.TempDir()) {
+		return errors.New("Remove can only remove temporary directories, tryied to remove " + tempdir)
 	}
-	return errors.New(fmt.Sprintf("%s is not in $PATH", tempdir))
+	path := os.Getenv("PATH")
+	index := strings.Index(path, tempdir)
+	if index < 0 {
+		return errors.New(fmt.Sprintf("%s is not in $PATH", tempdir))
+	}
+	path = path[:index] + path[index+len(tempdir)+1:]
+	err := os.Setenv("PATH", path)
+	if err != nil {
+		return err
+	}
+	return os.RemoveAll(tempdir)
 }
