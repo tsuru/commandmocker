@@ -20,6 +20,7 @@ var source = `#!/bin/sh -e
 
 output="{{.}}"
 echo -n "${output}"
+touch $(dirname ${0})/.ran
 `
 
 var pathMutex sync.Mutex
@@ -60,6 +61,15 @@ func Add(name, output string) (tempdir string, err error) {
 	path = tempdir + ":" + path
 	err = os.Setenv("PATH", path)
 	return
+}
+
+// Ran indicates whether the mocked executable was called or not.
+//
+// It just checks if the given tempdir contains a .ran file.
+func Ran(tempdir string) bool {
+	p := path.Join(tempdir, ".ran")
+	_, err := os.Stat(p)
+	return err == nil || !os.IsNotExist(err)
 }
 
 // Remove removes the tempdir from $PATH and from file system.

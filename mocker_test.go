@@ -94,3 +94,30 @@ func TestRemoveShouldReturnErrorIfTheGivenDirectoryDoesNotStartWithSlashTmp(t *t
 		t.Error("Should not be able to remove non-temporary directories, but it was.")
 	}
 }
+
+func TestRanCheckIfTheDotRanFileExists(t *testing.T) {
+	dir, err := Add("ls", "bla")
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	defer Remove(dir)
+	p := path.Join(dir, ".ran")
+	f, err := os.Create(p)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	defer f.Close()
+	table := map[string]bool{
+		dir:            true,
+		"/tmp/bla/bla": false,
+		"/home/blabla": false,
+	}
+	for input, expected := range table {
+		got := Ran(input)
+		if got != expected {
+			t.Errorf("Ran on %s?\nExpected: %q.\nGot: %q.", input, expected, got)
+		}
+	}
+}
