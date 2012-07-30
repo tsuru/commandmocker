@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-var source = `#!/bin/sh -e
+var source = `#!/bin/bash -e
 
 output="{{.}}"
 echo -n "${output}"
