@@ -5,6 +5,7 @@
 package commandmocker
 
 import (
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -119,5 +120,28 @@ func TestRanCheckIfTheDotRanFileExists(t *testing.T) {
 		if got != expected {
 			t.Errorf("Ran on %s?\nExpected: %q.\nGot: %q.", input, expected, got)
 		}
+	}
+}
+
+func TestErrorGeneratesTheFileThatReturnsExitStatusCode(t *testing.T) {
+	var (
+		content, p string
+		b          []byte
+	)
+	dir, err := Error("ssh", "bla", 1)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	defer Remove(dir)
+	p = path.Join(dir, "ssh")
+	b, err = ioutil.ReadFile(p)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	content = string(b)
+	if !strings.Contains(content, "exit 1") {
+		t.Errorf(`Did not find "exit 1" in the generated file. Content: %s`, content)
 	}
 }

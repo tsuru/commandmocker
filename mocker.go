@@ -18,20 +18,15 @@ import (
 
 var source = `#!/bin/bash -e
 
-output="{{.}}"
+output="{{.output}}"
 echo -n "${output}"
 touch $(dirname ${0})/.ran
+exit {{.status}}
 `
 
 var pathMutex sync.Mutex
 
-// Add creates a temporary directory containing an executable file named "name"
-// that prints "output" when executed. It also adds the temporary directory to
-// the first position of $PATH.
-//
-// It returns the temporary directory path (for future removing, using the
-// Remove function) and an error if any happen.
-func Add(name, output string) (tempdir string, err error) {
+func add(name, output string, status int) (tempdir string, err error) {
 	tempdir = path.Join(os.TempDir(), "commandmocker+" + time.Now().Format("20060102150405999999999"))
 	_, err = os.Stat(tempdir)
 	for !os.IsNotExist(err) {
@@ -51,7 +46,11 @@ func Add(name, output string) (tempdir string, err error) {
 	if err != nil {
 		return
 	}
-	err = t.Execute(f, output)
+	param := map[string]interface{}{
+		"output": output,
+		"status": status,
+	}
+	err = t.Execute(f, param)
 	if err != nil {
 		return
 	}
@@ -61,6 +60,23 @@ func Add(name, output string) (tempdir string, err error) {
 	path = tempdir + ":" + path
 	err = os.Setenv("PATH", path)
 	return
+}
+
+// Add creates a temporary directory containing an executable file named "name"
+// that prints "output" when executed. It also adds the temporary directory to
+// the first position of $PATH.
+//
+// It returns the temporary directory path (for future removing, using the
+// Remove function) and an error if any happen.
+func Add(name, output string) (tempdir string, err error) {
+	return add(name, output, 0)
+}
+
+// Error works like Add, but the created executable returns a non-zero status
+// code (an error). The returned status code will be the value provided by
+// status.
+func Error(name, output string, status int) (tempdir string, err error) {
+	return add(name, output, status)
 }
 
 // Ran indicates whether the mocked executable was called or not.
