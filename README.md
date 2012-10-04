@@ -1,6 +1,6 @@
 #commandmocker
 
-[![Build Status](https://secure.travis-ci.org/timeredbull/commandmocker.png?branch=master)](http://travis-ci.org/timeredbull/commandmocker)
+[![Build Status](https://secure.travis-ci.org/globocom/commandmocker.png?branch=master)](http://travis-ci.org/globocom/commandmocker)
 
 commandmocker is a simple utility for tests in Go. It adds command with expected output to the path.
 
