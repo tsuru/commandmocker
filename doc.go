@@ -9,7 +9,7 @@
 // looks like this:
 //
 //     import (
-//         "github.com/timeredbull/commandmocker"
+//         "github.com/globocom/commandmocker"
 //         "testing"
 //     )
 //

@@ -7,7 +7,7 @@ commandmocker is a simple utility for tests in Go. It adds command with expected
 For example, if you want to mock the command "ssh", you can write a test that looks like this:
 
     import (
-        "github.com/timeredbull/commandmocker"
+        "github.com/globocom/commandmocker"
         "testing"
     )
 
