@@ -19,11 +19,7 @@ import (
 var source = `#!/bin/bash -e
 
 output="{{.output}}"
-{{if .status}}
-echo -n "${output}" >&2
-{{else}}
-echo -n "${output}"
-{{end}}
+echo -n "${output}"{{if .status}} >&2{{end}}
 touch $(dirname ${0})/.ran
 exit {{.status}}
 `
