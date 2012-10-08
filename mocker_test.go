@@ -5,6 +5,7 @@
 package commandmocker
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -143,5 +144,25 @@ func TestErrorGeneratesTheFileThatReturnsExitStatusCode(t *testing.T) {
 	content = string(b)
 	if !strings.Contains(content, "exit 1") {
 		t.Errorf(`Did not find "exit 1" in the generated file. Content: %s`, content)
+	}
+}
+
+func TestErrorReturnsOutputInStderr(t *testing.T) {
+	dir, err := Error("ssh", "ble", 42)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	defer Remove(dir)
+	cmd := exec.Command("ssh")
+	var b bytes.Buffer
+	cmd.Stderr = &b
+	err = cmd.Run()
+	if err == nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	if string(b.String()) != "ble" {
+		t.Errorf("should print ble running ssh, but printed %s", b.String())
 	}
 }

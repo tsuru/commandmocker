@@ -19,7 +19,11 @@ import (
 var source = `#!/bin/bash -e
 
 output="{{.output}}"
+{{if .status}}
+echo -n "${output}" >&2
+{{else}}
 echo -n "${output}"
+{{end}}
 touch $(dirname ${0})/.ran
 exit {{.status}}
 `
@@ -27,10 +31,10 @@ exit {{.status}}
 var pathMutex sync.Mutex
 
 func add(name, output string, status int) (tempdir string, err error) {
-	tempdir = path.Join(os.TempDir(), "commandmocker+" + time.Now().Format("20060102150405999999999"))
+	tempdir = path.Join(os.TempDir(), "commandmocker+"+time.Now().Format("20060102150405999999999"))
 	_, err = os.Stat(tempdir)
 	for !os.IsNotExist(err) {
-		tempdir = path.Join(os.TempDir(), "commandmocker+" + time.Now().Format("20060102150405999999999"))
+		tempdir = path.Join(os.TempDir(), "commandmocker+"+time.Now().Format("20060102150405999999999"))
 		_, err = os.Stat(tempdir)
 	}
 	err = os.MkdirAll(tempdir, 0777)
