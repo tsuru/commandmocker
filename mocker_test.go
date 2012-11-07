@@ -49,6 +49,24 @@ func TestAddFunctionShouldPutAnExecutableInTheReturnedDirectoryThatPrintsTheGive
 	}
 }
 
+func TestOutputFunctionReturnsOutputOfExecutedCommand(t *testing.T) {
+	dir, err := Add("ssh", "$*")
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	defer Remove(dir)
+	_, err = exec.Command("ssh", "foo", "bar").Output()
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	out := Output(dir)
+	if out != "foo bar" {
+		t.Errorf("Output function should return output of ssh command execution, got '%s'", out)
+	}
+}
+
 func TestRemoveFunctionShouldRemoveTheTempDirFromPath(t *testing.T) {
 	dir, _ := Add("ssh", "success")
 	err := Remove(dir)
