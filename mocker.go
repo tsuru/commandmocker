@@ -28,6 +28,7 @@ exit {{.status}}
 var pathMutex sync.Mutex
 
 func add(name, output string, status int) (tempdir string, err error) {
+	pathMutex.Lock()
 	tempdir = path.Join(os.TempDir(), "commandmocker+"+time.Now().Format("20060102150405999999999"))
 	_, err = os.Stat(tempdir)
 	for !os.IsNotExist(err) {
@@ -55,8 +56,6 @@ func add(name, output string, status int) (tempdir string, err error) {
 	if err != nil {
 		return
 	}
-	pathMutex.Lock()
-	defer pathMutex.Unlock()
 	path := os.Getenv("PATH")
 	path = tempdir + ":" + path
 	err = os.Setenv("PATH", path)
@@ -111,7 +110,6 @@ func Remove(tempdir string) error {
 	if !strings.HasPrefix(tempdir, os.TempDir()) {
 		return errors.New("Remove can only remove temporary directories, tryied to remove " + tempdir)
 	}
-	pathMutex.Lock()
 	path := os.Getenv("PATH")
 	index := strings.Index(path, tempdir)
 	if index < 0 {
