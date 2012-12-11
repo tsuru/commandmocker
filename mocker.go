@@ -20,7 +20,7 @@ import (
 var source = `#!/bin/bash -e
 
 output="{{.output}}"
-echo -n "${output}"{{if .status}} >&2{{end}} | tee $(dirname ${0})/.out
+echo -n "${output}"{{if .status}} >&2{{end}} | tee -a $(dirname ${0})/.out
 touch $(dirname ${0})/.ran
 exit {{.status}}
 `

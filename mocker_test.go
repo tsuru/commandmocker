@@ -185,3 +185,23 @@ func TestErrorReturnsOutputInStderr(t *testing.T) {
 		t.Errorf("should print ble running ssh, but printed %s", b.String())
 	}
 }
+
+func TestMultipleCallsAppendToOutput(t *testing.T) {
+	dir, err := Add("ssh", "ble")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer Remove(dir)
+	err = exec.Command("ssh").Run()
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = exec.Command("ssh").Run()
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := Output(dir)
+	if got != "bleble" {
+		t.Errorf("Output(%q): Want %q. Got %q.", dir, "bleble", got)
+	}
+}
