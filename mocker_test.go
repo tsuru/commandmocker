@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -203,5 +204,23 @@ func TestMultipleCallsAppendToOutput(t *testing.T) {
 	got := Output(dir)
 	if got != "bleble" {
 		t.Errorf("Output(%q): Want %q. Got %q.", dir, "bleble", got)
+	}
+}
+
+func TestParameters(t *testing.T) {
+	dir, err := Add("ssh", ".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer Remove(dir)
+	command := exec.Command("ssh", "-l", "me", "-o", "StrictHostKeyChecking no", "localhost")
+	err = command.Run()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := command.Args[1:]
+	got := Parameters(dir)
+	if !reflect.DeepEqual(got, expected) {
+		t.Errorf("Parameters(%q):\n\tWant %#v. Got %#v.", dir, expected, got)
 	}
 }
