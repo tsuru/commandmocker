@@ -1,4 +1,4 @@
-// Copyright 2012 commandmocker authors. All rights reserved.
+// Copyright 2013 commandmocker authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -6,6 +6,7 @@ package commandmocker
 
 import (
 	"bufio"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -15,7 +16,6 @@ import (
 	"sync"
 	"syscall"
 	"text/template"
-	"time"
 )
 
 var source = `#!/bin/bash -e
@@ -35,10 +35,13 @@ var pathMutex sync.Mutex
 
 func add(name, output string, status int) (tempdir string, err error) {
 	pathMutex.Lock()
-	tempdir = path.Join(os.TempDir(), "commandmocker+"+time.Now().Format("20060102150405999999999"))
+	var buf [8]byte
+	rand.Read(buf[:])
+	tempdir = path.Join(os.TempDir(), fmt.Sprintf("commandmocker-%x", buf))
 	_, err = os.Stat(tempdir)
 	for !os.IsNotExist(err) {
-		tempdir = path.Join(os.TempDir(), "commandmocker+"+time.Now().Format("20060102150405999999999"))
+		rand.Read(buf[:])
+		tempdir = path.Join(os.TempDir(), fmt.Sprintf("commandmocker-%x", buf))
 		_, err = os.Stat(tempdir)
 	}
 	err = os.MkdirAll(tempdir, 0777)
