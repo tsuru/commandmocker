@@ -12,10 +12,10 @@ For example, if you want to mock the command "ssh", you can write a test that lo
     )
 
     func TestScreamsIfSSHFail(t *testing.T) {
-        path, err := commandmocker.Add("ssh", "ssh: Could not resolve hostname myhost: nodename nor servname provided, or not known")
+        message := "ssh: Could not resolve hostname myhost: nodename nor servname provided, or not known"
+        path, err := commandmocker.Error("ssh", message, 65)
         if err != nil {
-            t.Error(err)
-            t.FailNow()
+            t.Fatal(err)
         }
         defer commandmocker.Remove(path)
 
