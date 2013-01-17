@@ -31,10 +31,7 @@ touch ${dirname}/.ran
 exit {{.status}}
 `
 
-var pathMutex sync.Mutex
-
 func add(name, output string, status int) (tempdir string, err error) {
-	pathMutex.Lock()
 	var buf [8]byte
 	rand.Read(buf[:])
 	tempdir = path.Join(os.TempDir(), fmt.Sprintf("commandmocker-%x", buf))
@@ -143,12 +140,10 @@ func Remove(tempdir string) error {
 	path := os.Getenv("PATH")
 	index := strings.Index(path, tempdir)
 	if index < 0 {
-		pathMutex.Unlock()
 		return errors.New(fmt.Sprintf("%s is not in $PATH", tempdir))
 	}
 	path = path[:index] + path[index+len(tempdir)+1:]
 	err := os.Setenv("PATH", path)
-	pathMutex.Unlock()
 	if err != nil {
 		return err
 	}
