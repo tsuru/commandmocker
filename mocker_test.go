@@ -90,15 +90,6 @@ func TestRemoveFunctionShouldRemoveTheTempDirFromFileSystem(t *testing.T) {
 	}
 }
 
-func TestShouldNotRemoveTheFirstItemWhenTheGivenDirectoryIsNotTheFirstInThePath(t *testing.T) {
-	pathMutex.Lock()
-	dir := os.TempDir() + "/blabla"
-	err := Remove(dir)
-	if err == nil || err.Error() != dir+" is not in $PATH" {
-		t.Errorf("Should not be able to remove a directory that is not in $PATH")
-	}
-}
-
 func TestShouldRemoveDirectoryFromArbitraryLocationInPath(t *testing.T) {
 	dir, _ := Add("ssh", "success")
 	path := os.Getenv("PATH")

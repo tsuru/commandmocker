@@ -31,6 +31,7 @@ touch ${dirname}/.ran
 exit {{.status}}
 `
 
+
 func add(name, output string, status int) (tempdir string, err error) {
 	var buf [8]byte
 	rand.Read(buf[:])
@@ -62,9 +63,12 @@ func add(name, output string, status int) (tempdir string, err error) {
 	if err != nil {
 		return
 	}
+	var pathMutex sync.Mutex
+	pathMutex.Lock()
 	path := os.Getenv("PATH")
 	path = tempdir + ":" + path
 	err = os.Setenv("PATH", path)
+	pathMutex.Unlock()
 	return
 }
 
