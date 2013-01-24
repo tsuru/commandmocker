@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package commandmocker is a simple utility for tests in Go. It adds command
+// with expected output/failure to the path.
 package commandmocker
 
 import (
