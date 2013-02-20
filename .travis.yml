@@ -3,4 +3,5 @@ before_script:
   - mkdir -p $GOPATH/src/github.com/globocom/commandmocker
   - mv * $GOPATH/src/github.com/globocom/commandmocker
 script:
+  - pushd $GOPATH/src/github.com/globocom/commandmocker
   - go test
