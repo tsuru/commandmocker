@@ -1,1 +1,6 @@
 language: go
+before_script:
+  - mkdir -p $GOPATH/src/github.com/globocom/commandmocker
+  - mv * $GOPATH/src/github.com/globocom/commandmocker
+script:
+  - go test
