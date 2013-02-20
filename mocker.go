@@ -33,7 +33,6 @@ touch ${dirname}/.ran
 exit {{.status}}
 `
 
-
 func add(name, output string, status int) (tempdir string, err error) {
 	var buf [8]byte
 	rand.Read(buf[:])
