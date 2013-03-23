@@ -6,6 +6,7 @@ package commandmocker
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -105,6 +106,19 @@ func TestRemoveShouldReturnErrorIfTheGivenDirectoryDoesNotStartWithSlashTmp(t *t
 	err := Remove("/some/usr/bin")
 	if err == nil || err.Error() != "Remove can only remove temporary directories, tryied to remove /some/usr/bin" {
 		t.Error("Should not be able to remove non-temporary directories, but it was.")
+	}
+}
+
+func TestRemoveShouldReturnErrorIfTheGivenDirectoryIsNotInThePath(t *testing.T) {
+	dir, _ := Add("ssh", "success")
+	path := os.Getenv("PATH")
+	os.Setenv("PATH", "/:"+path)
+	defer Remove(dir)
+	p := os.TempDir() + "/waaaaaat"
+	want := fmt.Sprintf("%q is not in $PATH", p)
+	err := Remove(p)
+	if err == nil || err.Error() != want {
+		t.Errorf("Should not be able to remove path that isn't in $PATH, but was.")
 	}
 }
 

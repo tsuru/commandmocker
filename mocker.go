@@ -145,7 +145,7 @@ func Remove(tempdir string) error {
 	path := os.Getenv("PATH")
 	index := strings.Index(path, tempdir)
 	if index < 0 {
-		return errors.New(fmt.Sprintf("%s is not in $PATH", tempdir))
+		return errors.New(fmt.Sprintf("%q is not in $PATH", tempdir))
 	}
 	path = path[:index] + path[index+len(tempdir)+1:]
 	err := os.Setenv("PATH", path)
