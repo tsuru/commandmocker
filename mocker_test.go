@@ -229,3 +229,15 @@ func TestParameters(t *testing.T) {
 		t.Errorf("Parameters(%q):\n\tWant %#v. Got %#v.", dir, expected, got)
 	}
 }
+
+func TestParametersNotRan(t *testing.T) {
+	dir, err := Add("ssh", ".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer Remove(dir)
+	got := Parameters(dir)
+	if got != nil {
+		t.Errorf("Parameters(%q):\n\tWant %#v. Got %#v.", dir, nil, got)
+	}
+}
