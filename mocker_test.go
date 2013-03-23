@@ -69,6 +69,20 @@ func TestOutputFunctionReturnsOutputOfExecutedCommand(t *testing.T) {
 	}
 }
 
+func TestOutputNotRan(t *testing.T) {
+	dir, err := Add("ssh", "$*")
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	defer Remove(dir)
+	want := ""
+	got := Output(dir)
+	if got != want {
+		t.Errorf("Output(%q):\n\tWant %q. Got %q.", dir, want, got)
+	}
+}
+
 func TestRemoveFunctionShouldRemoveTheTempDirFromPath(t *testing.T) {
 	dir, _ := Add("ssh", "success")
 	err := Remove(dir)
