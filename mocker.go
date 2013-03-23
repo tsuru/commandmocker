@@ -103,12 +103,7 @@ func Ran(tempdir string) bool {
 // execution.
 func Output(tempdir string) string {
 	p := path.Join(tempdir, ".out")
-	f, err := os.OpenFile(p, os.O_RDONLY, 0755)
-	if err != nil {
-		return ""
-	}
-	defer f.Close()
-	b, err := ioutil.ReadAll(f)
+	b, err := ioutil.ReadFile(p)
 	if err != nil {
 		return ""
 	}
