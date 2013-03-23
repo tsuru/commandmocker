@@ -33,11 +33,11 @@ touch ${dirname}/.ran
 exit {{.status}}
 `
 
-func add(name, output string, status int) (tempdir string, err error) {
+func add(name, output string, status int) (string, error) {
 	var buf [8]byte
 	rand.Read(buf[:])
-	tempdir = path.Join(os.TempDir(), fmt.Sprintf("commandmocker-%x", buf))
-	_, err = os.Stat(tempdir)
+	tempdir := path.Join(os.TempDir(), fmt.Sprintf("commandmocker-%x", buf))
+	_, err := os.Stat(tempdir)
 	for !os.IsNotExist(err) {
 		rand.Read(buf[:])
 		tempdir = path.Join(os.TempDir(), fmt.Sprintf("commandmocker-%x", buf))
@@ -45,16 +45,16 @@ func add(name, output string, status int) (tempdir string, err error) {
 	}
 	err = os.MkdirAll(tempdir, 0777)
 	if err != nil {
-		return
+		return "", err
 	}
 	f, err := os.OpenFile(path.Join(tempdir, name), syscall.O_WRONLY|syscall.O_CREAT|syscall.O_TRUNC, 0755)
 	if err != nil {
-		return
+		return "", err
 	}
 	defer f.Close()
 	t, err := template.New(name).Parse(source)
 	if err != nil {
-		return
+		return "", err
 	}
 	param := map[string]interface{}{
 		"output": output,
@@ -62,7 +62,7 @@ func add(name, output string, status int) (tempdir string, err error) {
 	}
 	err = t.Execute(f, param)
 	if err != nil {
-		return
+		return "", err
 	}
 	var pathMutex sync.Mutex
 	pathMutex.Lock()
@@ -70,7 +70,7 @@ func add(name, output string, status int) (tempdir string, err error) {
 	path = tempdir + ":" + path
 	err = os.Setenv("PATH", path)
 	pathMutex.Unlock()
-	return
+	return tempdir, nil
 }
 
 // Add creates a temporary directory containing an executable file named "name"
@@ -79,14 +79,14 @@ func add(name, output string, status int) (tempdir string, err error) {
 //
 // It returns the temporary directory path (for future removing, using the
 // Remove function) and an error if any happen.
-func Add(name, output string) (tempdir string, err error) {
+func Add(name, output string) (string, error) {
 	return add(name, output, 0)
 }
 
 // Error works like Add, but the created executable returns a non-zero status
 // code (an error). The returned status code will be the value provided by
 // status.
-func Error(name, output string, status int) (tempdir string, err error) {
+func Error(name, output string, status int) (string, error) {
 	return add(name, output, status)
 }
 
