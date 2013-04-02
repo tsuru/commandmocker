@@ -20,14 +20,15 @@ import (
 	"text/template"
 )
 
-var source = `#!/bin/bash -e
+var source = `#!/bin/sh -e
 
+echo=$(which echo)
 output="{{.output}}"
 dirname=$(dirname ${0})
-echo -n "${output}"{{if .status}} >&2{{end}} | tee -a ${dirname}/.out
+$echo -n "${output}"{{if .status}} >&2{{end}} | tee -a ${dirname}/.out
 for i in "$@"
 do
-	echo $i >> ${dirname}/.params
+	$echo $i >> ${dirname}/.params
 done
 touch ${dirname}/.ran
 exit {{.status}}
