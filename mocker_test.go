@@ -12,9 +12,55 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
+	"runtime"
 	"strings"
+	"sync"
 	"testing"
 )
+
+func TestAddWithConcurrence(t *testing.T) {
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		dir, err := Add("ssh", "msg1")
+		defer Remove(dir)
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+		runtime.Gosched()
+		cmd := exec.Command("ssh")
+		output, err := cmd.Output()
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+		if string(output) != "msg1" {
+			t.Errorf("output should be 'msg1' but it's is %s", output)
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		dir, err := Add("ssh", "msg2")
+		defer Remove(dir)
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+		runtime.Gosched()
+		cmd := exec.Command("ssh")
+		output, err := cmd.Output()
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+		if string(output) != "msg2" {
+			t.Errorf("output should be 'msg2' but it's is %s", output)
+		}
+	}()
+	wg.Wait()
+}
 
 func TestAddFunctionReturnADirectoryThatIsInThePath(t *testing.T) {
 	dir, err := Add("ssh", "success")

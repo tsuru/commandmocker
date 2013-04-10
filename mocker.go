@@ -18,6 +18,7 @@ import (
 	"sync"
 	"syscall"
 	"text/template"
+	"time"
 )
 
 var source = `#!/bin/sh -e
@@ -33,8 +34,25 @@ done
 touch ${dirname}/.ran
 exit {{.status}}
 `
+var running map[string]string
+var runningMutex sync.RWMutex
+var pathMutex sync.Mutex
+
+func init() {
+	running = map[string]string{}
+}
 
 func add(name, output string, status int) (string, error) {
+	for {
+		runningMutex.RLock()
+		_, ok := running[name]
+		runningMutex.RUnlock()
+		if !ok {
+			break
+		}
+		time.Sleep(1)
+	}
+	runningMutex.Lock()
 	var buf [8]byte
 	rand.Read(buf[:])
 	tempdir := path.Join(os.TempDir(), fmt.Sprintf("commandmocker-%x", buf))
@@ -44,6 +62,8 @@ func add(name, output string, status int) (string, error) {
 		tempdir = path.Join(os.TempDir(), fmt.Sprintf("commandmocker-%x", buf))
 		_, err = os.Stat(tempdir)
 	}
+	running[name] = tempdir
+	runningMutex.Unlock()
 	err = os.MkdirAll(tempdir, 0777)
 	if err != nil {
 		return "", err
@@ -65,7 +85,6 @@ func add(name, output string, status int) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var pathMutex sync.Mutex
 	pathMutex.Lock()
 	path := os.Getenv("PATH")
 	path = tempdir + ":" + path
@@ -135,6 +154,17 @@ func Parameters(tempdir string) []string {
 // This function is intended only to undo what Add does. It returns error if
 // the given tempdir is not a temporary directory.
 func Remove(tempdir string) error {
+	defer func() {
+		var k string
+		runningMutex.Lock()
+		for key, value := range running {
+			if value == tempdir {
+				k = key
+			}
+		}
+		delete(running, k)
+		runningMutex.Unlock()
+	}()
 	if !strings.HasPrefix(tempdir, os.TempDir()) {
 		return errors.New("Remove can only remove temporary directories, tryied to remove " + tempdir)
 	}
