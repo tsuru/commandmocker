@@ -140,11 +140,9 @@ func Parameters(tempdir string) []string {
 	}
 	defer f.Close()
 	var params []string
-	reader := bufio.NewReader(f)
-	line, err := reader.ReadString('\n')
-	for err == nil {
-		params = append(params, strings.TrimSpace(line))
-		line, err = reader.ReadString('\n')
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		params = append(params, scanner.Text())
 	}
 	return params
 }
