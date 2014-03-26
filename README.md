@@ -1,13 +1,13 @@
 #commandmocker
 
-[![Build Status](https://secure.travis-ci.org/globocom/commandmocker.png?branch=master)](http://travis-ci.org/globocom/commandmocker)
+[![Build Status](https://secure.travis-ci.org/tsuru/commandmocker.png?branch=master)](http://travis-ci.org/tsuru/commandmocker)
 
 commandmocker is a simple utility for tests in Go. It adds command with expected output to the path.
 
 For example, if you want to mock the command "ssh", you can write a test that looks like this:
 
     import (
-        "github.com/globocom/commandmocker"
+        "github.com/tsuru/commandmocker"
         "testing"
     )
 
