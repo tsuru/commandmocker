@@ -32,6 +32,7 @@ do
 	$echo $i >> ${dirname}/.params
 done
 touch ${dirname}/.ran
+env >> ${dirname}/.envs
 exit {{.status}}
 `
 var running map[string]string
@@ -124,6 +125,17 @@ func Ran(tempdir string) bool {
 func Output(tempdir string) string {
 	p := path.Join(tempdir, ".out")
 	b, err := ioutil.ReadFile(p)
+	if err != nil {
+		return ""
+	}
+	return string(b)
+}
+
+// Envs returns the environment variables available to the previously added
+// command execution.
+func Envs(tempdir string) string {
+	envs := path.Join(tempdir, ".envs")
+	b, err := ioutil.ReadFile(envs)
 	if err != nil {
 		return ""
 	}

@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
+	"regexp"
 	"runtime"
 	"strings"
 	"sync"
@@ -299,5 +300,25 @@ func TestParametersNotRan(t *testing.T) {
 	got := Parameters(dir)
 	if got != nil {
 		t.Errorf("Parameters(%q):\n\tWant %#v. Got %#v.", dir, nil, got)
+	}
+}
+
+func TestEnvsReturnsProcessEnvs(t *testing.T) {
+	dir, err := Add("ssh", ".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer Remove(dir)
+	command := exec.Command("ssh", ".")
+	command.Env = append(os.Environ(), "MYVAR=xyz")
+	err = command.Run()
+	if err != nil {
+		t.Fatal(err)
+	}
+	envs := Envs(dir)
+	pattern := `(?s).*MYVAR=xyz.*`
+	isMatch, _ := regexp.MatchString(pattern, envs)
+	if !isMatch {
+		t.Errorf("Envs(%q):\n\tWant to match %s. Got %s.", dir, pattern, envs)
 	}
 }
