@@ -19,7 +19,7 @@ import (
 	"testing"
 )
 
-func TestAddWithConcurrence(t *testing.T) {
+func TestAddWithConcurrency(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go func() {
@@ -61,6 +61,28 @@ func TestAddWithConcurrence(t *testing.T) {
 		}
 	}()
 	wg.Wait()
+}
+
+func TestAddMultiLineOutput(t *testing.T) {
+	dir, err := Add("ssh", "success\nforever\n")
+	defer Remove(dir)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	_, err = os.Stat(path.Join(dir, "ssh"))
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	out, err := exec.Command("ssh").Output()
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	if string(out) != "success\nforever" {
+		t.Errorf("should print success by running ssh, but printed %q", string(out))
+	}
 }
 
 func TestAddFunctionReturnADirectoryThatIsInThePath(t *testing.T) {

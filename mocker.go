@@ -21,10 +21,13 @@ import (
 	"time"
 )
 
-var source = `#!/bin/sh -e
+var source = `#!/bin/bash -e
 
 echo=$(which echo)
-output="{{.output}}"
+output=$(cat <<EOF
+{{.output}}
+EOF
+)
 dirname=$(dirname ${0})
 $echo -n "${output}"{{if .status}} >&2{{end}} | tee -a ${dirname}/.out
 for i in "$@"
