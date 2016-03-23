@@ -1,4 +1,4 @@
-// Copyright 2015 commandmocker authors. All rights reserved.
+// Copyright 2016 commandmocker authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -116,7 +116,38 @@ func TestAddFunctionShouldPutAnExecutableInTheReturnedDirectoryThatPrintsTheGive
 		t.FailNow()
 	}
 	if string(out) != "success" {
-		t.Errorf("should print success by running ssh, but printed %s", string(out))
+		t.Errorf("should print success by running ssh, but printed %s", out)
+	}
+}
+
+func TestAddStderr(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	dir, err := AddStderr("ssh", "success", "WARNING: do not do that in the future")
+	defer Remove(dir)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	_, err = os.Stat(path.Join(dir, "ssh"))
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	cmd := exec.Command("ssh")
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err = cmd.Run()
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	expectedStdout := "success"
+	expectedStderr := "WARNING: do not do that in the future"
+	if stdout.String() != expectedStdout {
+		t.Errorf("should print %q in stdout by running ssh, but printed %q", expectedStdout, stdout.String())
+	}
+	if stderr.String() != expectedStderr {
+		t.Errorf("should print %q in stderr by running ssh, but printed %q", expectedStderr, stderr.String())
 	}
 }
 

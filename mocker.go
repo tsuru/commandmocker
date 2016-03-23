@@ -1,4 +1,4 @@
-// Copyright 2015 commandmocker authors. All rights reserved.
+// Copyright 2016 commandmocker authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -28,8 +28,15 @@ output=$(cat <<EOF
 {{.output}}
 EOF
 )
+erroutput=$(cat <<EOF
+{{.erroutput}}
+EOF
+)
 dirname=$(dirname ${0})
-$echo -n "${output}"{{if .status}} >&2{{end}} | tee -a ${dirname}/.out
+
+$echo -n "${output}" | tee -a ${dirname}/.out
+$echo -n "${erroutput}" >&2 | tee -a ${dirname}/.err
+
 for i in "$@"
 do
 	$echo $i >> ${dirname}/.params
@@ -46,7 +53,7 @@ func init() {
 	running = map[string]string{}
 }
 
-func add(name, output string, status int) (string, error) {
+func add(name, stdout, stderr string, status int) (string, error) {
 	for {
 		runningMutex.RLock()
 		_, ok := running[name]
@@ -82,8 +89,9 @@ func add(name, output string, status int) (string, error) {
 		return "", err
 	}
 	param := map[string]interface{}{
-		"output": output,
-		"status": status,
+		"output":    stdout,
+		"erroutput": stderr,
+		"status":    status,
 	}
 	err = t.Execute(f, param)
 	if err != nil {
@@ -104,14 +112,20 @@ func add(name, output string, status int) (string, error) {
 // It returns the temporary directory path (for future removing, using the
 // Remove function) and an error if any happen.
 func Add(name, output string) (string, error) {
-	return add(name, output, 0)
+	return add(name, output, "", 0)
+}
+
+// AddStderr works like Add, but it allow callers to specify the output for
+// both the stdout and stderr streams.
+func AddStderr(name, stdout, stderr string) (string, error) {
+	return add(name, stdout, stderr, 0)
 }
 
 // Error works like Add, but the created executable returns a non-zero status
 // code (an error). The returned status code will be the value provided by
 // status.
 func Error(name, output string, status int) (string, error) {
-	return add(name, output, status)
+	return add(name, "", output, status)
 }
 
 // Ran indicates whether the mocked executable was called or not.
