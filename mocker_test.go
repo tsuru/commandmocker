@@ -332,7 +332,7 @@ func TestParameters(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer Remove(dir)
-	command := exec.Command("ssh", "-l", "me", "-o", "StrictHostKeyChecking no", "localhost")
+	command := exec.Command("ssh", "-l", "me", "-o", "StrictHostKeyChecking no", "-E", "something", "-n", "localhost")
 	err = command.Run()
 	if err != nil {
 		t.Fatal(err)

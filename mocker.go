@@ -39,7 +39,7 @@ $echo -n "${erroutput}" >&2 | tee -a ${dirname}/.err
 
 for i in "$@"
 do
-	$echo "$i" >> ${dirname}/.params
+	$echo -- "$i" | sed -e 's/-- //' >> ${dirname}/.params
 done
 touch ${dirname}/.ran
 env >> ${dirname}/.envs
@@ -198,7 +198,7 @@ func Remove(tempdir string) error {
 	path := os.Getenv("PATH")
 	index := strings.Index(path, tempdir)
 	if index < 0 {
-		return errors.New(fmt.Sprintf("%q is not in $PATH", tempdir))
+		return fmt.Errorf("%q is not in $PATH", tempdir)
 	}
 	path = path[:index] + path[index+len(tempdir)+1:]
 	err := os.Setenv("PATH", path)
