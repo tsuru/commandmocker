@@ -39,7 +39,7 @@ $echo -n "${erroutput}" >&2 | tee -a ${dirname}/.err
 
 for i in "$@"
 do
-	$echo $i >> ${dirname}/.params
+	$echo "$i" >> ${dirname}/.params
 done
 touch ${dirname}/.ran
 env >> ${dirname}/.envs
